@@ -26,7 +26,7 @@ import contextlib
 import dnf.i18n
 import dnf.util
 import dnf.yum.misc
-import gpgme
+import gpg
 import io
 import logging
 import os
@@ -67,8 +67,7 @@ def keyids_from_pubring(gpgdir):
     if not os.path.exists(gpgdir):
         return []
 
-    with pubring_dir(gpgdir):
-        ctx = gpgme.Context()
+    with pubring_dir(gpgdir), gpg.Context() as ctx:
         keyids = []
         for k in ctx.keylist():
             subkey = _extract_signing_subkey(k)
@@ -102,9 +101,8 @@ def pubring_dir(pubring_dir):
 def rawkey2infos(key_fo):
     pb_dir = tempfile.mkdtemp()
     keyinfos = []
-    with pubring_dir(pb_dir):
-        ctx = gpgme.Context()
-        ctx.import_(key_fo)
+    with pubring_dir(pb_dir), gpg.Context() as ctx:
+        res = ctx.op_import(key_fo)
         for key in ctx.keylist():
             subkey = _extract_signing_subkey(key)
             if subkey is None:
@@ -112,9 +110,10 @@ def rawkey2infos(key_fo):
             keyinfos.append(Key(key, subkey))
         ctx.armor = True
         for info in keyinfos:
-            buf = io.BytesIO()
-            ctx.export(info.id_, buf)
-            info.raw_key = buf.getvalue()
+            with gpg.Data() as sink:
+                ctx.op_export(info.id_, 0, sink)
+                sink.seek(0, os.SEEK_SET)
+                info.raw_key = sink.read()
     dnf.util.rm_rf(pb_dir)
     return keyinfos
 

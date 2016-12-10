@@ -32,8 +32,7 @@ import dnf.exceptions
 import dnf.i18n
 import errno
 import glob
-import gpgme
-import gpgme.editutil
+import gpg
 import gzip
 import hashlib
 import io
@@ -280,17 +279,13 @@ def import_key_to_pubring(rawkey, keyid, gpgdir=None, make_ro_copy=True):
         os.makedirs(gpgdir)
 
     key_fo = io.BytesIO(rawkey)
-    with dnf.crypto.pubring_dir(gpgdir):
+    with dnf.crypto.pubring_dir(gpgdir), gpg.Context() as ctx:
         # import the key
-        ctx = gpgme.Context()
         fp = open(os.path.join(gpgdir, 'gpg.conf'), 'wb')
         fp.write(b'')
         fp.close()
-        ctx.import_(key_fo)
+        ctx.op_import(key_fo)
         key_fo.close()
-        # ultimately trust the key or pygpgme is definitionally stupid
-        k = ctx.get_key(keyid)
-        gpgme.editutil.edit_trust(ctx, k, gpgme.VALIDITY_ULTIMATE)
 
         if make_ro_copy:
 
