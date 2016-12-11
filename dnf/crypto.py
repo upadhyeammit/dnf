@@ -102,7 +102,7 @@ def rawkey2infos(key_fo):
     pb_dir = tempfile.mkdtemp()
     keyinfos = []
     with pubring_dir(pb_dir), gpg.Context() as ctx:
-        res = ctx.op_import(key_fo)
+        ctx.op_import(key_fo)
         for key in ctx.keylist():
             subkey = _extract_signing_subkey(key)
             if subkey is None:
