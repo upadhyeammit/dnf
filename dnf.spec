@@ -112,8 +112,8 @@ Requires:       pygpgme
 BuildRequires:  python2-pygpgme
 Requires:       python2-pygpgme
 %else
-BuildRequires:  python2-gpgme
-Requires:       python2-gpgme
+BuildRequires:  python2-gpg
+Requires:       python2-gpg
 %endif
 BuildRequires:  pyliblzma
 BuildRequires:  rpm-python >= %{rpm_version}
@@ -148,8 +148,8 @@ BuildRequires:  python3-nose
 BuildRequires:  python3-pygpgme
 Requires:       python3-pygpgme
 %else
-BuildRequires:  python3-gpgme
-Requires:       python3-gpgme
+BuildRequires:  python3-gpg
+Requires:       python3-gpg
 %endif
 BuildRequires:  rpm-python3 >= %{rpm_version}
 Requires:       %{name}-conf = %{version}-%{release}
